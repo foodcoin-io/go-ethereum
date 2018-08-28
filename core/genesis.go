@@ -315,7 +315,7 @@ func DefaultGenesisBlock() *Genesis {
 		Nonce:      66,
 		ExtraData:  hexutil.MustDecode("0x7575757575757575757575757575757575757575757575757575757575757575"),
 		GasLimit:   16777216,
-		Difficulty: big.NewInt(200000),
+		Difficulty: big.NewInt(350000),
 		Alloc: map[common.Address]GenesisAccount{
 			common.HexToAddress("0x9d0153b19d99975f17b5c03ae84c8165e09b7809"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},
 			common.HexToAddress("0x38482d1dce48e1B4e727ff1a2BE29Ff3b9EF6A53"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},
