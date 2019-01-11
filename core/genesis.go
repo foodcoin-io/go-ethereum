@@ -309,13 +309,13 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 //	}
 //}
 
+// DefaultGenesisBlock returns the Foodcoin main net genesis block.
 func DefaultGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.MainnetChainConfig,
-		Nonce:      66,
-		ExtraData:  hexutil.MustDecode("0x7575757575757575757575757575757575757575757575757575757575757575"),
+		ExtraData:  hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000009d0153b19d99975f17b5c03ae84c8165e09b78090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   16777216,
-		Difficulty: big.NewInt(350000),
+		Difficulty: big.NewInt(1),
 		Alloc: map[common.Address]GenesisAccount{
 			common.HexToAddress("0x9d0153b19d99975f17b5c03ae84c8165e09b7809"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},
 			common.HexToAddress("0x38482d1dce48e1B4e727ff1a2BE29Ff3b9EF6A53"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},

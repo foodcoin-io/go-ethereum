@@ -52,6 +52,7 @@ type Snapshot struct {
 	Number  uint64                      `json:"number"`  // Block number where the snapshot was created
 	Hash    common.Hash                 `json:"hash"`    // Block hash where the snapshot was created
 	Signers map[common.Address]struct{} `json:"signers"` // Set of authorized signers at this moment
+	Voters  map[common.Address]struct{} `json:"voters"`  // Set of authorized voters at this moment
 	Recents map[uint64]common.Address   `json:"recents"` // Set of recent signers for spam protections
 	Votes   []*Vote                     `json:"votes"`   // List of votes cast in chronological order
 	Tally   map[common.Address]Tally    `json:"tally"`   // Current vote tally to avoid recalculating
@@ -74,11 +75,15 @@ func newSnapshot(config *params.CliqueConfig, sigcache *lru.ARCCache, number uin
 		Number:   number,
 		Hash:     hash,
 		Signers:  make(map[common.Address]struct{}),
+		Voters:   make(map[common.Address]struct{}),
 		Recents:  make(map[uint64]common.Address),
 		Tally:    make(map[common.Address]Tally),
 	}
 	for _, signer := range signers {
 		snap.Signers[signer] = struct{}{}
+	}
+	for _, voter := range signers {
+		snap.Voters[voter] = struct{}{}
 	}
 	return snap
 }
@@ -116,6 +121,7 @@ func (s *Snapshot) copy() *Snapshot {
 		Number:   s.Number,
 		Hash:     s.Hash,
 		Signers:  make(map[common.Address]struct{}),
+		Voters:   make(map[common.Address]struct{}),
 		Recents:  make(map[uint64]common.Address),
 		Votes:    make([]*Vote, len(s.Votes)),
 		Tally:    make(map[common.Address]Tally),
@@ -128,6 +134,9 @@ func (s *Snapshot) copy() *Snapshot {
 	}
 	for address, tally := range s.Tally {
 		cpy.Tally[address] = tally
+	}
+	for voter := range s.Voters {
+		cpy.Voters[voter] = struct{}{}
 	}
 	copy(cpy.Votes, s.Votes)
 
@@ -214,6 +223,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 			return nil, err
 		}
 		if _, ok := snap.Signers[signer]; !ok {
+			return nil, errUnauthorizedSigner
+		}
+		if _, ok := snap.Voters[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
 		for _, recent := range snap.Recents {

@@ -57,6 +57,8 @@ var (
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
+	FoodcoinBlockReward = big.NewInt(4e+18) // Block reward in wei for successfully mining a block
+
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
 
@@ -580,12 +582,31 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 // Finalize implements consensus.Engine, ensuring no uncles are set, nor block
 // rewards given, and returns the final block.
 func (c *Clique) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
-	// No block rewards in PoA, so the state remains as is and uncles are dropped
+
+	// Accumulate any block rewards and commit the final state root
+	if (c.signer != common.Address{}) {
+		c.accumulateRewards(chain.Config(), state, c.signer)
+	} else {
+		// Resolve the authorization key and check against signers
+		signer, _ := ecrecover(header, c.signatures)
+		c.accumulateRewards(chain.Config(), state, signer)
+	}
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
 
 	// Assemble and return the final block for sealing
 	return types.NewBlock(header, txs, nil, receipts), nil
+}
+
+// AccumulateRewards credits the coinbase of the given block with the mining
+// reward. The total reward consists of the static block reward.
+func (c *Clique) accumulateRewards(config *params.ChainConfig, state *state.StateDB, signer common.Address) {
+	// Select the correct block reward based on chain progression
+	blockReward := FoodcoinBlockReward
+	// Accumulate the rewards for the miner and any included uncles
+	reward := new(big.Int).Set(blockReward)
+	log.Info("AccumulateRewards: ", "signer", signer, "reward", reward)
+	state.AddBalance(signer, reward)
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks
@@ -631,7 +652,7 @@ func (c *Clique) Seal(chain consensus.ChainReader, block *types.Block, results c
 		if recent == signer {
 			// Signer is among recents, only wait if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); number < limit || seen > number-limit {
-				log.Info("Signed recently, must wait for others")
+				log.Info("Signed recently, must wait for others", "number", number, "limit", limit, "seen", seen)
 				return nil
 			}
 		}
