@@ -42,7 +42,7 @@ import (
 )
 
 // PublicEthereumAPI provides an API to access Ethereum full node-related
-// information.
+// information
 type PublicEthereumAPI struct {
 	e *Ethereum
 }
