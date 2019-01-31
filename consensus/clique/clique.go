@@ -57,7 +57,7 @@ var (
 	extraVanity = 32 // Fixed number of extra-data prefix bytes reserved for signer vanity
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
-	FoodcoinBlockReward = big.NewInt(1e+18) // Block reward in wei for successfully mining a block
+	FoodcoinBlockReward = big.NewInt(5e+17) // Block reward in wei for successfully mining a block
 
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
@@ -495,7 +495,6 @@ func (c *Clique) verifySeal(chain consensus.ChainReader, header *types.Header, p
 	}
 	for seen, recent := range snap.Recents {
 		if recent == signer {
-			//log.Info("VerifySeal: ", "signer", signer, "limit", uint64(len(snap.Signers)/2 + 1), "seen", seen, "number", number)
 			// Signer is among recents, only fail if the current block doesn't shift it out
 			if limit := uint64(len(snap.Signers)/2 + 1); seen > number-limit {
 				return errRecentlySigned
@@ -606,7 +605,7 @@ func (c *Clique) accumulateRewards(config *params.ChainConfig, state *state.Stat
 	blockReward := FoodcoinBlockReward
 	// Accumulate the rewards for the miner and any included uncles
 	reward := new(big.Int).Set(blockReward)
-	log.Info("AccumulateRewards: ", "signer", signer, "reward", reward)
+	//log.Info("AccumulateRewards: ", "signer", signer, "reward", reward)
 	state.AddBalance(signer, reward)
 }
 

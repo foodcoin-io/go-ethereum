@@ -309,23 +309,21 @@ func GenesisBlockForTesting(db ethdb.Database, addr common.Address, balance *big
 //	}
 //}
 
+func GetBalanceFromString(balance string) *big.Int {
+	n, _ := new(big.Int).SetString(balance, 10)
+	return n
+}
+
 // DefaultGenesisBlock returns the Foodcoin main net genesis block.
 func DefaultGenesisBlock() *Genesis {
 	return &Genesis{
 		Config:     params.MainnetChainConfig,
-		ExtraData:  hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000009d0153b19d99975f17b5c03ae84c8165e09b78090000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		ExtraData:  hexutil.MustDecode("0x00000000000000000000000000000000000000000000000000000000000000004524e28a25f431497b56a134151c5bc79790a153614764b5fea6520feefe91640244dc7a3661327c0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
 		GasLimit:   16777216,
 		Difficulty: big.NewInt(1),
 		Alloc: map[common.Address]GenesisAccount{
-			common.HexToAddress("0x9d0153b19d99975f17b5c03ae84c8165e09b7809"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},
-			common.HexToAddress("0x38482d1dce48e1B4e727ff1a2BE29Ff3b9EF6A53"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+20)},
-			common.HexToAddress("0x0819da8a19d469CD9593c4449E587d4156cF6065"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+2)},
-			common.HexToAddress("0x34e8e31425377cd0ba0953bfbccf53931c476033"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+2)},
-			common.HexToAddress("0x18985e72babda5b4c0b6c418063ee3bf5225f05e"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+2)},
-			common.HexToAddress("0x18e69b39fb539eb646dfd94e930bfd8da7a544af"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+2)},
-			common.HexToAddress("0x83a573f16f67b20b4dc03323d8948c71e1380533"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+1)},
-			common.HexToAddress("0xcb963a9eedb1e0cf56d94552593b25d04eed84e8"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+1)},
-			common.HexToAddress("0x83a573f16f67b20b4dc03323d8948c71e1380533"): {Balance: new(big.Int).Lsh(big.NewInt(1), 64+1)},
+			common.HexToAddress("0x698c22e945312eE9097c449dA9bD955F6D3E6F03"): {Balance: GetBalanceFromString("4769999000000000000000000000")},
+			common.HexToAddress("0xd1B9102E87E8324CbB8E20cA5Fa864157043Db16"): {Balance: GetBalanceFromString("1000000000000000000000")},
 		},
 	}
 }
