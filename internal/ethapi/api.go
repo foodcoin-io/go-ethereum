@@ -50,9 +50,9 @@ import (
 )
 
 const (
+	defaultGasPrice = params.GWei
     abiFRJSON = `[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"registry","outputs":[{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"}],"name":"getPersonRegistryCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"registryIndex","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"}],"name":"isPerson","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"},{"name":"from","type":"address"},{"name":"index","type":"uint256"}],"name":"getVariableNameAtIndex","outputs":[{"name":"varName","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"verificators","outputs":[{"name":"verificatorAddress","type":"address"},{"name":"timestamp","type":"uint256"},{"name":"licenceIssuedTimeStamp","type":"uint256"},{"name":"licenceValidUntilTimeStamp","type":"uint256"},{"name":"index","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"},{"name":"from","type":"address"},{"name":"name","type":"string"}],"name":"getVar","outputs":[{"name":"exist","type":"bool"},{"name":"varName","type":"string"},{"name":"varValue","type":"string"},{"name":"timestamp","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"},{"name":"from","type":"address"},{"name":"index","type":"uint256"}],"name":"getVarByIndex","outputs":[{"name":"exist","type":"bool"},{"name":"varName","type":"string"},{"name":"varValue","type":"string"},{"name":"timestamp","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getRegistryIndex","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"verificatorAddress","type":"address"},{"name":"licenceValidUntilTimeStamp","type":"uint256"}],"name":"updateVerificatorLicenseExpiration","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"},{"name":"index","type":"uint256"}],"name":"getPersonRegistryAddressAtIndex","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"verificatorAddress","type":"address"},{"name":"licenceIssuedTimeStamp","type":"uint256"},{"name":"licenceValidUntilTimeStamp","type":"uint256"}],"name":"addVerificator","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getPersonsCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"verificatorsIndex","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"}],"name":"getPersonRegistryIndex","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getVerificatorAtIndex","outputs":[{"name":"verificatorAddress","type":"address"},{"name":"timestamp","type":"uint256"},{"name":"licenceIssuedTimeStamp","type":"uint256"},{"name":"licenceValidUntilTimeStamp","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"personAddress","type":"address"},{"name":"from","type":"address"}],"name":"getVariablesCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getVerificatorsIndex","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getVerificatorsCount","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"index","type":"uint256"}],"name":"getPersonAddressAtIndex","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"personAddress","type":"address"},{"name":"name","type":"string"},{"name":"value","type":"string"}],"name":"setVar","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"personAddress","type":"address"},{"indexed":false,"name":"name","type":"string"},{"indexed":false,"name":"value","type":"string"},{"indexed":false,"name":"timestamp","type":"uint256"}],"name":"LogSetVariable","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"verificatorAddress","type":"address"},{"indexed":false,"name":"licenceIssuedTimeStamp","type":"uint256"},{"indexed":false,"name":"licenceValidUntilTimeStamp","type":"uint256"}],"name":"LogAddVerificator","type":"event"}]`
 	registryAddress = `0xb9c84fe5d9ee933202012efa6380bd83930d44cc`
-	defaultGasPrice = params.GWei
 )
 
 // PublicEthereumAPI provides an API to access Ethereum related information.
@@ -344,7 +344,7 @@ func (s *PrivateAccountAPI) LockAccount(addr common.Address) bool {
 	return fetchKeystore(s.am).Lock(addr) == nil
 }
 
-// signTransactions sets defaults and signs the given transaction
+// signTransaction sets defaults and signs the given transaction
 // NOTE: the caller needs to ensure that the nonceLock is held, if applicable,
 // and release it after the transaction has been submitted to the tx pool
 func (s *PrivateAccountAPI) signTransaction(ctx context.Context, args *SendTxArgs, passwd string) (*types.Transaction, error) {
@@ -688,7 +688,7 @@ type CallArgs struct {
 	Data     hexutil.Bytes   `json:"data"`
 }
 
-func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr rpc.BlockNumber, vmCfg vm.Config, timeout time.Duration) ([]byte, uint64, bool, error) {
+func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr rpc.BlockNumber, timeout time.Duration) ([]byte, uint64, bool, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
 
 	state, header, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
@@ -729,7 +729,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 	defer cancel()
 
 	// Get a new instance of the EVM.
-	evm, vmError, err := s.b.GetEVM(ctx, msg, state, header, vmCfg)
+	evm, vmError, err := s.b.GetEVM(ctx, msg, state, header)
 	if err != nil {
 		return nil, 0, false, err
 	}
@@ -753,7 +753,7 @@ func (s *PublicBlockChainAPI) doCall(ctx context.Context, args CallArgs, blockNr
 // Call executes the given transaction on the state for the given block number.
 // It doesn't make and changes in the state/blockchain and is useful to execute and retrieve values.
 func (s *PublicBlockChainAPI) Call(ctx context.Context, args CallArgs, blockNr rpc.BlockNumber) (hexutil.Bytes, error) {
-	result, _, _, err := s.doCall(ctx, args, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := s.doCall(ctx, args, blockNr, 5*time.Second)
 	return (hexutil.Bytes)(result), err
 }
 
@@ -848,7 +848,7 @@ func (s *PublicBlockChainAPI) GetVarFR(ctx context.Context, args FRGetArgs, bloc
 		args.Data = packed
 	}
 
-	result, _, _, err := s.doCall(ctx, args.CallArgs, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := s.doCall(ctx, args.CallArgs, blockNr, 5*time.Second)
 
 	err = abi.Unpack(&ev, "getVar", result)
 
@@ -935,7 +935,7 @@ func (s *PublicBlockChainAPI) GetVerificatorsCount(ctx context.Context, args Cal
 		args.Data = packed
 	}
 
-	result, _, _, err := s.doCall(ctx, args, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := s.doCall(ctx, args, blockNr, 5*time.Second)
 
 	err = abi.Unpack(&ev, "getVerificatorsCount", result)
 
@@ -966,7 +966,7 @@ func (s *PublicBlockChainAPI) GetVerificatorsIndex(ctx context.Context, args Cal
 		args.Data = packed
 	}
 
-	result, _, _, err := s.doCall(ctx, args, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := s.doCall(ctx, args, blockNr, 5*time.Second)
 
 	err = abi.Unpack(&ev, "getVerificatorsIndex", result)
 
@@ -998,7 +998,7 @@ func (s *PublicBlockChainAPI) GetVerificatorAtIndex(ctx context.Context, args FR
 		args.Data = packed
 	}
 
-	result, _, _, err := s.doCall(ctx, args.CallArgs, blockNr, vm.Config{}, 5*time.Second)
+	result, _, _, err := s.doCall(ctx, args.CallArgs, blockNr, 5*time.Second)
 
 	err = abi.Unpack(&ev, "getVerificatorAtIndex", result)
 
@@ -1060,7 +1060,7 @@ func (s *PublicBlockChainAPI) EstimateGas(ctx context.Context, args CallArgs) (h
 	executable := func(gas uint64) bool {
 		args.Gas = hexutil.Uint64(gas)
 
-		_, _, failed, err := s.doCall(ctx, args, rpc.PendingBlockNumber, vm.Config{}, 0)
+		_, _, failed, err := s.doCall(ctx, args, rpc.PendingBlockNumber, 0)
 		if err != nil || failed {
 			return false
 		}
@@ -1357,6 +1357,15 @@ func (s *PublicTransactionPoolAPI) GetRawTransactionByBlockHashAndIndex(ctx cont
 
 // GetTransactionCount returns the number of transactions the given address has sent for the given block number
 func (s *PublicTransactionPoolAPI) GetTransactionCount(ctx context.Context, address common.Address, blockNr rpc.BlockNumber) (*hexutil.Uint64, error) {
+	// Ask transaction pool for the nonce which includes pending transactions
+	if blockNr == rpc.PendingBlockNumber {
+		nonce, err := s.b.GetPoolNonce(ctx, address)
+		if err != nil {
+			return nil, err
+		}
+		return (*hexutil.Uint64)(&nonce), nil
+	}
+	// Resolve block number and use its state to ask for the nonce
 	state, _, err := s.b.StateAndHeaderByNumber(ctx, blockNr)
 	if state == nil || err != nil {
 		return nil, err
