@@ -579,16 +579,16 @@ func (c *Clique) Prepare(chain consensus.ChainReader, header *types.Header) erro
 	return nil
 }
 
-// Finalize implements consensus.Engine, ensuring no uncles are set, nor block
-// rewards given, and returns the final block.
+// Finalize implements consensus.Engine, ensuring no uncles are set, set block
+// rewards, and returns the final block.
 func (c *Clique) Finalize(chain consensus.ChainReader, header *types.Header, state *state.StateDB, txs []*types.Transaction, uncles []*types.Header, receipts []*types.Receipt) (*types.Block, error) {
 
+	signer, _ := ecrecover(header, c.signatures)
 	// Accumulate any block rewards and commit the final state root
-	if (c.signer != common.Address{}) {
+	if (c.signer != common.Address{} && signer == common.Address{}) {
 		c.accumulateRewards(chain.Config(), state, c.signer)
 	} else {
 		// Resolve the authorization key and check against signers
-		signer, _ := ecrecover(header, c.signatures)
 		c.accumulateRewards(chain.Config(), state, signer)
 	}
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
