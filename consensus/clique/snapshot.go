@@ -225,9 +225,9 @@ func (s *Snapshot) apply(headers []*types.Header) (*Snapshot, error) {
 		if _, ok := snap.Signers[signer]; !ok {
 			return nil, errUnauthorizedSigner
 		}
-		if _, ok := snap.Voters[signer]; !ok {
-			return nil, errUnauthorizedSigner
-		}
+		//if _, ok := snap.Voters[signer]; !ok {
+		//	return nil, errUnauthorizedVoter
+		//}
 		for _, recent := range snap.Recents {
 			if recent == signer {
 				return nil, errRecentlySigned
