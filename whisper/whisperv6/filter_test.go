@@ -36,11 +36,6 @@ func InitSingleTest() {
 	mrand.Seed(seed)
 }
 
-func InitDebugTest(i int64) {
-	seed = i
-	mrand.Seed(seed)
-}
-
 type FilterTestCase struct {
 	f      *Filter
 	id     string
@@ -56,7 +51,7 @@ func generateFilter(t *testing.T, symmetric bool) (*Filter, error) {
 	f.Topics = make([][]byte, topicNum)
 	for i := 0; i < topicNum; i++ {
 		f.Topics[i] = make([]byte, 4)
-		mrand.Read(f.Topics[i][:])
+		mrand.Read(f.Topics[i])
 		f.Topics[i][0] = 0x01
 	}
 
@@ -309,8 +304,7 @@ func TestMatchEnvelope(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create new message with seed %d: %s.", seed, err)
 	}
-	env, err := msg.Wrap(params)
-	if err != nil {
+	if _, err = msg.Wrap(params); err != nil {
 		t.Fatalf("failed Wrap with seed %d: %s.", seed, err)
 	}
 
@@ -322,7 +316,7 @@ func TestMatchEnvelope(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create new message with seed %d: %s.", seed, err)
 	}
-	env, err = msg.Wrap(params)
+	env, err := msg.Wrap(params)
 	if err != nil {
 		t.Fatalf("failed Wrap() with seed %d: %s.", seed, err)
 	}
