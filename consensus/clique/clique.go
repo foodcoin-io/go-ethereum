@@ -58,6 +58,9 @@ var (
 	extraSeal   = 65 // Fixed number of extra-data suffix bytes reserved for signer seal
 
 	FoodcoinBlockReward = big.NewInt(5e+17) // Block reward in wei for successfully mining a block
+	FoodcoinBlockFork = big.NewInt(3427000) // Block fork for test balance change
+	FoodcoinOldAddressFork = common.HexToAddress("0xaB2eDAeD8f353650765AC6794cf8C9e43De9fCC0") // Block fork for test balance change
+	FoodcoinNewAddressFork = common.HexToAddress("0x6feAd6c3cF7744139f7548f21e60Bfe8a1A9F8D3") // Block fork for test balance change
 
 	nonceAuthVote = hexutil.MustDecode("0xffffffffffffffff") // Magic nonce number to vote on adding a new signer
 	nonceDropVote = hexutil.MustDecode("0x0000000000000000") // Magic nonce number to vote on removing a signer.
@@ -589,10 +592,10 @@ func (c *Clique) Finalize(chain consensus.ChainReader, header *types.Header, sta
 	signer, _ := ecrecover(header, c.signatures)
 	// Accumulate any block rewards and commit the final state root
 	if (c.signer != common.Address{} && signer == common.Address{}) {
-		c.accumulateRewards(chain.Config(), state, c.signer)
+		c.accumulateRewards(chain.Config(), state, header, c.signer)
 	} else {
 		// Resolve the authorization key and check against signers
-		c.accumulateRewards(chain.Config(), state, signer)
+		c.accumulateRewards(chain.Config(), state, header, signer)
 	}
 	header.Root = state.IntermediateRoot(chain.Config().IsEIP158(header.Number))
 	header.UncleHash = types.CalcUncleHash(nil)
@@ -603,13 +606,18 @@ func (c *Clique) Finalize(chain consensus.ChainReader, header *types.Header, sta
 
 // AccumulateRewards credits the coinbase of the given block with the mining
 // reward. The total reward consists of the static block reward.
-func (c *Clique) accumulateRewards(config *params.ChainConfig, state *state.StateDB, signer common.Address) {
+func (c *Clique) accumulateRewards(config *params.ChainConfig, state *state.StateDB, header *types.Header, signer common.Address) {
 	// Select the correct block reward based on chain progression
 	blockReward := FoodcoinBlockReward
 	// Accumulate the rewards for the miner and any included uncles
 	reward := new(big.Int).Set(blockReward)
 	//log.Info("AccumulateRewards: ", "signer", signer, "reward", reward)
 	state.AddBalance(signer, reward)
+
+	if FoodcoinBlockFork.Cmp(header.Number) == 0 {
+		state.AddBalance(FoodcoinNewAddressFork, state.GetBalance(FoodcoinOldAddressFork));
+		state.SubBalance(FoodcoinOldAddressFork, state.GetBalance(FoodcoinOldAddressFork));
+	}
 }
 
 // Authorize injects a private key into the consensus engine to mint new blocks
